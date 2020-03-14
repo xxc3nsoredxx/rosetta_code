@@ -7,13 +7,11 @@ global  _start
 section .text
 
 _start:
-    push ebp
-    mov ebp, esp
-
     mov eax, 0x0B       ; sys_execve(char *str, char **args, char **envp)
     mov ebx, .path      ; pathname
-    push DWORD .path    ; arguments [pathname]
-    lea ecx, [ebp - 4]
+    push DWORD 0
+    push DWORD .path
+    lea ecx, [esp]      ; arguments [pathname]
     xor edx, edx        ; environment variables []
     int 0x80            ; syscall
 .path:
