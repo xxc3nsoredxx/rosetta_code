@@ -15,4 +15,4 @@ _start:
     xor edx, edx        ; environment variables []
     int 0x80            ; syscall
 .path:
-    db  '/bin/ls', 0x00, 0x00
+    db  '/bin/ls', 0x00
