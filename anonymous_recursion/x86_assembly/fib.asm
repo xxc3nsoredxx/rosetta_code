@@ -13,19 +13,8 @@ _start:
     mov ebx, 48         ; Calculate which Fn will be computed
     sub ebx, ecx        ; Takes into account the reversed nature
     push    ebx         ; Pass the parameter in on the stack
-    call    .fib        ; Initial call to fib(n)
-    add esp, 4          ; Remove the parameter from the stack
-    push    ecx         ; Save the counter between calls
-    push    eax         ; Print the number
-    call    print_num
-    add esp, 4
-    pop ecx             ; Restore the loop counter
-    loop    .loop       ; Loop until 0
-
-    mov eax, 0x01       ; sys_exit(int error)
-    xor ebx, ebx        ; error = 0 (success)
-    int 0x80            ; syscall
-
+    push    .done       ; Emulate a call but "return" to end of loop
+                        ; The return adress is manually set on the stack
 ; int fib (int n)
 ; Returns the n'th Fn
 ; fib(n) =  0                   if n <= 0
@@ -45,19 +34,30 @@ _start:
     dec ebx             ; Calculate fib(n-1)
     push    ebx
     call    .fib
-    add esp, 4
-    push    eax         ; Save the first result
+    mov [esp], eax      ; Save result on top of parameter in stack
     dec ebx             ; Calculate fib(n-2)
     push    ebx
     call    .fib
-    add esp, 4
-    pop edx             ; Add the first to the second
-    add eax, edx
+    add eax, [esp + 4]  ; Add the first to the second
+    add esp, 8          ; Reset local stack
 .return:
     pop ebx             ; Restore modified registers
     mov esp, ebp        ; Tear down stack frame and return
     pop ebp
     ret
+.done:
+    add esp, 4          ; Remove the parameter from the stack
+    mov [esp], ecx      ; Save the counter between calls
+    push    eax         ; Print the number
+    call    print_num
+    add esp, 4
+    pop ecx             ; Restore the loop counter
+    loop    .loop       ; Loop until 0
+
+    mov eax, 0x01       ; sys_exit(int error)
+    xor ebx, ebx        ; error = 0 (success)
+    int 0x80            ; syscall
+
 
 ; void print_num (int n)
 ; Prints an integer and newline
@@ -67,12 +67,8 @@ print_num:
     sub esp, 11         ; Save space for digits and newline
     push    ebx
 
-    mov BYTE [ebp - 1], 0x0A    ; Set the newline at the end
-    mov DWORD [ebp - 5], 0  ; Clear the digit buffer
-    mov DWORD [ebp - 9], 0
-    mov WORD [ebp - 11], 0
-
     lea ecx, [ebp - 1]  ; Save a pointer to after the buffer
+    mov BYTE [ecx], 0x0A    ; Set the newline at the end
     mov eax, [ebp + 8]  ; Get the parameter
     mov ebx, DWORD 10   ; Divisor
 .loop:
