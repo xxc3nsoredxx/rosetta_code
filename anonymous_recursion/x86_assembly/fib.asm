@@ -46,7 +46,6 @@ _start:
     pop ebp
     ret
 .done:
-    add esp, 4          ; Remove the parameter from the stack
     mov [esp], ecx      ; Save the counter between calls
     push    eax         ; Print the number
     call    print_num
