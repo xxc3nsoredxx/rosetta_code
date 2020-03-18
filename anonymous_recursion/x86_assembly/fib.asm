@@ -58,14 +58,12 @@ _start:
     xor ebx, ebx        ; error = 0 (success)
     int 0x80            ; syscall
 
-
 ; void print_num (int n)
 ; Prints an integer and newline
 print_num:
     push    ebp
     mov ebp, esp
     sub esp, 11         ; Save space for digits and newline
-    push    ebx
 
     lea ecx, [ebp - 1]  ; Save a pointer to after the buffer
     mov BYTE [ecx], 0x0A    ; Set the newline at the end
@@ -86,7 +84,6 @@ print_num:
     sub edx, ecx        ; address after newline - address of first digit
     int 0x80
 
-    pop ebx
     mov esp, ebp
     pop ebp
     ret
